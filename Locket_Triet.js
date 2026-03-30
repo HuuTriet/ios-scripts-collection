@@ -1,6 +1,6 @@
 /**
  * @name Locket Gold Bypass
- * @author Nguyễn Hữu Triết (DE180336)
+ * @author Nguyễn Hữu Triết 
  */
 
 const userAgent = $request.headers["User-Agent"] || $request.headers["user-agent"];

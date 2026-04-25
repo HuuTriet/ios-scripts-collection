@@ -5,7 +5,7 @@
 #!icon=https://raw.githubusercontent.com/HuuTriet/ios-scripts-collection/main/icon.png
 
 [Script]
-Meitu_VIP = type=http-response, pattern=^https?:\/\/api-sub\.meitu\.com\/v\d\/user\/vip_info, script-path=https://raw.githubusercontent.com/HuuTriet/ios-scripts-collection/main/Meitu_Triet.js, requires-body=true, max-size=-1, timeout=60
+Meitu_VIP = type=http-response, pattern=^https?:\/\/api-sub\.meitu\.com\/v\d\/user\/vip_info_by_group\.json, script-path=https://raw.githubusercontent.com/HuuTriet/ios-scripts-collection/main/Meitu_Triet.js, requires-body=true, max-size=-1, timeout=60
 
 [MITM]
 hostname = %APPEND% api-sub.meitu.com

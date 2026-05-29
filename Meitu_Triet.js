@@ -1,9 +1,10 @@
 /**
- * @name Meitu VIP Unlock
+ * @name Meitu / Wink VIP Unlock
  * @author Nguyễn Hữu Triết
- * @desc Mở khóa VIP cho Meitu (api-sub.meitu.com vN/user/vip_info_by_group.json).
+ * @desc Mở khóa VIP cho Wink (api-sub.meitu.com) và Meitu XiuXiu (xiuxiu.meitu.com).
  */
 
+const url = $request.url || "";
 const body = $response.body;
 
 if (!body) {
@@ -12,38 +13,46 @@ if (!body) {
     try {
         const obj = JSON.parse(body);
 
-        obj.data = {
-            active_sub_type: 2,
-            account_type: 1,
-            sub_type_name: "续期",
-            active_sub_order_id: "7069961436604422668",
-            trial_period_invalid_time: "",
-            current_order_invalid_time: "32662173600000",
-            active_order_id: "7069961436340181123",
-            limit_type: 0,
-            active_sub_type_name: "续期",
-            use_vip: true,
-            have_valid_contract: true,
-            derive_type_name: "普通会员",
-            derive_type: 1,
-            in_trial_period: false,
-            is_vip: true,
-            membership: {
-                id: "4",
-                display_name: "Meitu会员",
-                level: 1,
-                level_name: "普通会员"
-            },
-            active_promotion_status_list: [2],
-            sub_type: 2,
-            account_id: "1230010086",
-            invalid_time: "32662195199000",
-            valid_time: "1546992000000",
-            active_product_id: "0",
-            active_promotion_status: 2,
-            show_renew_flag: true
-        };
+        // --- Endpoint Wink: thay nguyên data bằng template VIP đã xác nhận ---
+        if (url.indexOf("vip_info_by_group") !== -1) {
+            obj.data = {
+                ...obj.data,
+                active_sub_type: 2,
+                account_type: 1,
+                sub_type_name: "续期",
+                active_sub_order_id: "7069961436604422668",
+                trial_period_invalid_time: "",
+                current_order_invalid_time: "32662173600000",
+                active_order_id: "7069961436340181123",
+                limit_type: 0,
+                active_sub_type_name: "续期",
+                use_vip: true,
+                have_valid_contract: true,
+                derive_type_name: "普通会员",
+                derive_type: 1,
+                in_trial_period: false,
+                is_vip: true,
+                membership: {
+                    id: "4",
+                    display_name: "Meitu会员",
+                    level: 1,
+                    level_name: "普通会员"
+                },
+                active_promotion_status_list: [2],
+                sub_type: 2,
+                account_id: "1230010086",
+                invalid_time: "32662195199000",
+                valid_time: "1546992000000",
+                active_product_id: "0",
+                active_promotion_status: 2,
+                show_renew_flag: true
+            };
+        } else {
+            // --- Endpoint Meitu XiuXiu / khác: best-effort lật cờ VIP đệ quy ---
+            flipVip(obj);
+        }
 
+        // Chuẩn hóa code thành công ở mọi cấp
         if (obj.meta && typeof obj.meta === "object") {
             obj.meta.code = 0;
             obj.meta.msg = "ok";
@@ -56,5 +65,29 @@ if (!body) {
     } catch (e) {
         console.log("[Meitu_Triet] error: " + e.message);
         $done({});
+    }
+}
+
+// Đệ quy lật các field VIP thường gặp về trạng thái bật, đẩy hạn dùng ra xa.
+function flipVip(node) {
+    if (!node || typeof node !== "object") return;
+    for (const key in node) {
+        const v = node[key];
+        const lk = key.toLowerCase();
+        if (typeof v === "boolean") {
+            if (/(is_vip|use_vip|vip|is_pro|is_member|have_valid_contract|is_subscribe|valid)/.test(lk)) {
+                node[key] = true;
+            }
+        } else if (typeof v === "number") {
+            if (/(invalid_time|expire|valid_time|end_time)/.test(lk) && v < 32662173600000) {
+                node[key] = 32662173600000;
+            }
+        } else if (typeof v === "string") {
+            if (/(invalid_time|expire|end_time)/.test(lk) && /^\d+$/.test(v)) {
+                node[key] = "32662173600000";
+            }
+        } else if (typeof v === "object") {
+            flipVip(v);
+        }
     }
 }

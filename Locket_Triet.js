@@ -4,6 +4,8 @@
  * @desc Null-safe, offerings-aware, no User-Agent dependency
  */
 
+$notify("Locket Debug", "RevenueCat Script ĐÃ CHẠY", $request.url);
+
 const body = $response.body;
 
 if (!body) {

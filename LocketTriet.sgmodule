@@ -1,40 +1,19 @@
 #!name=Locket Gold by Triet (Full)
 #!desc=Mở khóa Gold + toàn bộ hiệu ứng (45s video, filter, badge, chặn ads)
 #!author=HuuTriet
-#!homepage=https://github.com/HuuTriet
-#!icon=https://raw.githubusercontent.com/HuuTriet/ios-scripts-collection/main/icon.png
 
 [Script]
-
-# 1. RevenueCat — main host
+# 1. RevenueCat
 Locket_RC = type=http-response, \
-pattern=^https:\/\/api\.revenuecat\.com\/v\d\/(receipts|subscribers(\/[^\/]+)?(\/offerings)?|subscribers\/identify), \
+pattern=^https:\/\/api\.revenuecat\.com\/.+, \
 script-path=https://raw.githubusercontent.com/HuuTriet/ios-scripts-collection/main/Locket_Triet.js, \
 requires-body=true, max-size=-1, timeout=60
 
-# 2. RevenueCat — backup host
-Locket_RC_Backup = type=http-response, \
-pattern=^https:\/\/api\.rc-backup\.com\/v\d\/(receipts|subscribers(\/[^\/]+)?(\/offerings)?|subscribers\/identify), \
-script-path=https://raw.githubusercontent.com/HuuTriet/ios-scripts-collection/main/Locket_Triet.js, \
-requires-body=true, max-size=-1, timeout=60
-
-# 3. Firebase Remote Config — full effects
+# 2. Firebase
 Locket_Firebase = type=http-response, \
-pattern=^https:\/\/firebaseremoteconfig\.googleapis\.com\/v1\/projects\/locket-4252a\/.+, \
+pattern=^https:\/\/firebaseremoteconfig\.googleapis\.com\/.+, \
 script-path=https://raw.githubusercontent.com/HuuTriet/ios-scripts-collection/main/Locket_Firebase.js, \
 requires-body=true, max-size=-1, timeout=60
-
-# 4. Xóa If-None-Match (request)
-Locket_CleanHeader_Request = type=http-request, \
-pattern=^https:\/\/api\.revenuecat\.com\/.+\/(receipts|subscribers), \
-script-path=https://raw.githubusercontent.com/HuuTriet/ios-scripts-collection/main/CleanHeader_Request.js, \
-timeout=60
-
-# 5. Xóa ETag (response)
-Locket_CleanHeader_Response = type=http-response, \
-pattern=^https:\/\/api\.revenuecat\.com\/.+\/(receipts|subscribers), \
-script-path=https://raw.githubusercontent.com/HuuTriet/ios-scripts-collection/main/CleanHeader_Response.js, \
-timeout=60
 
 [MITM]
 hostname = %APPEND% api.revenuecat.com, api.rc-backup.com, firebaseremoteconfig.googleapis.com

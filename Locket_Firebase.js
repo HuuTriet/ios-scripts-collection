@@ -3,6 +3,8 @@
  * @desc Bật feature gates, chặn ads, mở video dài, filter, badge
  */
 
+$notify("Locket Debug", "Firebase Script ĐÃ CHẠY", $request.url);
+
 const body = $response.body;
 
 if (!body) {

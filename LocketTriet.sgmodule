@@ -1,20 +1,25 @@
-#!name=Locket Gold by Triet (Full)
-#!desc=Mở khóa Gold + toàn bộ hiệu ứng (45s video, filter, badge, chặn ads)
-#!author=HuuTriet
-#!homepage=https://github.com/HuuTriet
+#!name=Locket Gold Full Effects
+#!desc=Mở khóa Locket Gold + toàn bộ hiệu ứng (45s video, camera roll, filter, badge...)
+#!author=NightmarketServer (Clone by Triet)
 
 [Script]
-# 1. RevenueCat
-Locket_RC = type=http-response, \
-pattern=^https:\/\/api\.revenuecat\.com\/.+, \
-script-path=https://raw.githubusercontent.com/HuuTriet/ios-scripts-collection/main/Locket_Triet.js, \
+# 1. Fake RevenueCat (Gold subscription)
+revenuecat = type=http-response, \
+pattern=^https:\/\/api\.revenuecat\.com\/.+\/(receipts$|subscribers\/[^/]+$), \
+script-path=https://raw.githubusercontent.com/HuuTriet/ios-scripts-collection/main/locketfix8.js, \
 requires-body=true, max-size=-1, timeout=60
 
-# 2. Firebase
-Locket_Firebase = type=http-response, \
-pattern=^https:\/\/firebaseremoteconfig\.googleapis\.com\/.+, \
-script-path=https://raw.githubusercontent.com/HuuTriet/ios-scripts-collection/main/Locket_Firebase.js, \
+# 2. Xóa header ETag để luôn nhận dữ liệu mới
+deleteHeader = type=http-request, \
+pattern=^https:\/\/api\.revenuecat\.com\/.+\/(receipts|subscribers), \
+script-path=https://raw.githubusercontent.com/HuuTriet/ios-scripts-collection/main/header7.js, \
+timeout=60
+
+# 3. Force Remote Config (toàn bộ hiệu ứng + tính năng Gold)
+locket_rc = type=http-response, \
+pattern=^https:\/\/firebaseremoteconfig\.googleapis\.com\/v1\/projects\/locket-4252a\/.+, \
+script-path=https://raw.githubusercontent.com/HuuTriet/ios-scripts-collection/main/forceGold4.3.js, \
 requires-body=true, max-size=-1, timeout=60
 
 [MITM]
-hostname = %APPEND% api.revenuecat.com, api.rc-backup.com, firebaseremoteconfig.googleapis.com
+hostname = %APPEND% api.revenuecat.com, firebaseremoteconfig.googleapis.com

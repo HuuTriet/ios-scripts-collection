@@ -8,8 +8,8 @@ var NMS = {
   unsubscribe_detected_at: null, original_purchase_date: "2027-11-25T10:10:15Z",
   purchase_date: "2027-11-25T10:10:14Z", store: "app_store", store_transaction_id: "2000001108724193",
 }, locketGold = {
-  grace_period_expires_date: null, purchase_date: "2027-11-25T10:10:14Z",
-  product_identifier: "locket_1600_1y", expires_date: "9999-01-09T10:10:14Z"
+  grace_period_expires_date: null, purchase_date: "2021-11-25T10:10:14Z",
+  product_identifier: "locket_1600_1y", expires_date: "2099-01-09T10:10:14Z"
 };
 const match = Object.keys(mapping).find(e => ua.includes(e));
 if (match) {

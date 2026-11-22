@@ -4,7 +4,6 @@
 var ua = $request.headers["User-Agent"] || $request.headers["user-agent"] || "";
 var obj = JSON.parse($response.body);
 if (ua.includes("Locket")) {
-  obj.Attention = "Chúc mừng bạn! Vui lòng không bán hoặc chia sẻ cho người khác!";
   obj.entries = obj.entries || {};
   
   // 1. CẤU HÌNH GOLD, FEATURE GATES & PAYWALL

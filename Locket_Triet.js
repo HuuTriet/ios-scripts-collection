@@ -1,46 +1,75 @@
-/**
- * @name Locket Gold Bypass
- * @author Nguyễn Hữu Triết
+/*
+ * Locket Gold — RevenueCat response patcher
+ * Patched: null-safe, offerings-aware, no User-Agent dependency
  */
 
+const url = $request.url;
 const body = $response.body;
 
+// Chỉ xử lý khi có body
 if (body) {
-    try {
-        const userAgent = $request.headers["User-Agent"] || $request.headers["user-agent"];
-        let responseObj = JSON.parse(body);
+  try {
+    let obj = JSON.parse(body);
 
-        const appMapping = {
-            'Locket': { entitlement: 'Gold', product: 'locket_gold_yearly' }
-        };
-
-        const premiumTemplate = {
-            is_sandbox: false,
-            ownership_type: "PURCHASED",
-            period_type: "normal",
-            expires_date: "9999-12-31T23:59:59Z",
-            purchase_date: "2024-01-01T00:00:00Z",
-            original_purchase_date: "2024-01-01T00:00:00Z",
-            store: "app_store",
-            store_transaction_id: "triet_dev_66886688",
-        };
-
-        const matchedApp = Object.keys(appMapping).find(key => userAgent && userAgent.includes(key));
-
-        if (matchedApp) {
-            const { entitlement, product } = appMapping[matchedApp];
-            if (!responseObj.subscriber.entitlements) responseObj.subscriber.entitlements = {};
-            if (!responseObj.subscriber.subscriptions) responseObj.subscriber.subscriptions = {};
-
-            responseObj.subscriber.entitlements[entitlement] = { ...premiumTemplate, product_identifier: product };
-            responseObj.subscriber.subscriptions[product] = premiumTemplate;
-        }
-
-        responseObj.subscriber.management_url = "https://github.com/HuuTriet";
-        $done({ body: JSON.stringify(responseObj) });
-    } catch (e) {
-        $done({});
+    // ---------- Guard: subscriber phải tồn tại ----------
+    if (!obj.subscriber) {
+      // Response lạ (lỗi API, format thay đổi) — trả nguyên trạng, không crash
+      $done({ body: body });
+      return;
     }
+
+    const sub = obj.subscriber;
+
+    // ---------- Entitlements ----------
+    if (!sub.entitlements) sub.entitlements = {};
+    sub.entitlements.premium = {
+      expires_date: "9999-12-31T23:59:59Z",
+      product_identifier: "locket_premium",
+      purchase_date: "2024-01-01T00:00:00Z"
+    };
+
+    // ---------- Subscriptions (nếu app kiểm tra) ----------
+    if (!sub.subscriptions) sub.subscriptions = {};
+    sub.subscriptions.locket_premium = {
+      expires_date: "9999-12-31T23:59:59Z",
+      purchase_date: "2024-01-01T00:00:00Z",
+      period_type: "normal",
+      store: "app_store"
+    };
+
+    // ---------- Bỏ management_url gây nhiễu ----------
+    if (sub.management_url) delete sub.management_url;
+
+    // ---------- Offerings endpoint ----------
+    // Nếu URL chứa "/offerings", trả về offering giả để paywall không chặn
+    if (url.includes("/offerings")) {
+      // RevenueCat v1 trả về { offerings: [...], current_offering_id: ... }
+      // Nếu body gốc không có offerings, thêm vào để app không bị nil
+      if (!obj.offerings) {
+        obj.offerings = [
+          {
+            identifier: "default",
+            description: "Default offering",
+            packages: [
+              {
+                identifier: "$rc_monthly",
+                platform_product_identifier: "locket_premium_monthly"
+              }
+            ]
+          }
+        ];
+      }
+      if (!obj.current_offering_id) obj.current_offering_id = "default";
+    }
+
+    // ---------- Trả kết quả ----------
+    $done({ body: JSON.stringify(obj) });
+
+  } catch (e) {
+    // JSON hỏng hoặc lỗi bất ngờ — trả nguyên body, không làm sập app
+    $done({ body: body });
+  }
 } else {
-    $done({});
+  // Không có body (304, lỗi mạng) — trả nguyên trạng
+  $done({});
 }

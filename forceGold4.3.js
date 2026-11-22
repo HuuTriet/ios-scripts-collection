@@ -8,7 +8,7 @@ if (ua.includes("Locket")) {
   obj.entries.upsell_features = {
     "value": JSON.stringify({ app_icon_picker: true, camera_roll: true, camera_theme: true, locket_views: true, remove_ads: true, custom_widget_frames: true })
   };
-  obj.entries.video_duration_limit = { "value": "45" };
-  obj.entries.max_video_length_seconds = { "value": "45" };
+  obj.entries.video_duration_limit = { "value": "999999999" };
+  obj.entries.max_video_length_seconds = { "value": "999999999" };
 }
 $done({ body: JSON.stringify(obj) });

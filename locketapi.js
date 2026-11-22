@@ -1,27 +1,25 @@
 let body = $response.body;
 try {
   let obj = JSON.parse(body);
-  
-  // Hàm đệ quy quét sạch mọi ngóc ngách của JSON
-  function forceHack(o) {
+  // Quét đệ quy tìm mọi cờ premium của server Locket
+  function forcePremium(o) {
     for (let k in o) {
       if (typeof o[k] === 'object' && o[k] !== null) {
-        forceHack(o[k]);
+        forcePremium(o[k]);
       } else {
         let key = k.toLowerCase();
-        // Bật mọi thể loại Gold / Premium
-        if (key.includes('gold') || key.includes('premium') || key === 'ispro') {
+        // Bật mọi thể loại Gold / Premium / Pro
+        if (key.includes('gold') || key.includes('premium') || key.includes('pro') || key === 'ispro' || key === 'haspremium') {
           o[k] = true;
         }
         // Ép mọi thể loại limit video lên 45
-        if (key.includes('video') || key.includes('limit')) {
+        if (key.includes('limit') || key.includes('duration')) {
           if (typeof o[k] === 'number') o[k] = 45;
         }
       }
     }
   }
-  
-  forceHack(obj);
+  forcePremium(obj);
   $done({ body: JSON.stringify(obj) });
 } catch (e) {
   $done({});
